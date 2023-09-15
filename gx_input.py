@@ -23,14 +23,14 @@ def set_toml_variable(filename, group,var,value):
                 break
 
     print(startGroup,endGroup)
-    for i,l in enumerate(lines[startGroup:endGroup]): 
+    for i,l in enumerate(lines[startGroup:endGroup]):
+        ls = l.split('#',1)
+        l = ls[0]
         if var in l:
-            ls = l.split('#',1)
             if len(ls) > 1:
                 lcomment = ls[1]
             else:
                 lcomment = ''
-            l = ls[0]
             l = l.split('=')[0] + '= ' + str(value)
             print(l + lcomment)
             lines[startGroup + i] = l + " #" + lcomment + "\n"
@@ -142,6 +142,8 @@ class Gx_input(object):
     def dt(self,val):
         self.changevar("Time","dt",val)
 
+<<<<<<< HEAD
+<<<<<<<< HEAD:gx_input.py
     @property
     def alpha(self):
         return self.get_value_from_input_or_defaults("Geometry","alpha")
@@ -169,10 +171,31 @@ class Gx_input(object):
     @property
     def torflux(self): #stella compatibility
         return self.desired_normalized_toroidal_flux
-    
+
+        
     @torflux.setter
     def torflux(self,val): #stella compatibility
         self.desired_normalized_toroidal_flux = val
+    
+
+    @property
+    def ntheta(self):
+        return self.get_value_from_input_or_defaults("Dimensions","ntheta")
+
+    @ntheta.setter
+    def ntheta(self,val):
+        self.changevar("Dimensions","ntheta",val)
+
+    
+    @property
+    def npol(self):
+        return self.get_value_from_input_or_defaults("Geometry","npol")
+
+    @npol.setter
+    def npol(self,val):
+        self.changevar("Geometry","npol",val)
+
+
 
     @property
     def vmec_file(self):
@@ -191,15 +214,9 @@ class Gx_input(object):
         self.vmec_file = val
     
 
-    @property
-    def npol(self):
-        return self.get_value_from_input_or_defaults("Geometry","npol")
-
-    @npol.setter
-    def npol(self,val):
-        self.changevar("Geometry","npol",val)
 
         
+
 if __name__=="__main__":
 
     import sys

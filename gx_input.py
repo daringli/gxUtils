@@ -141,8 +141,65 @@ class Gx_input(object):
     @dt.setter
     def dt(self,val):
         self.changevar("Time","dt",val)
+
+    @property
+    def alpha(self):
+        return self.get_value_from_input_or_defaults("Geometry","alpha")
+
+    @alpha.setter
+    def alpha(self,val):
+        self.changevar("Geometry","alpha",val)
+
+    @property
+    def alpha0(self):
+        return self.alpha # for stella compatibility
+
+    @alpha0.setter
+    def alpha0(self,val): # for stella compatibility
+        self.alpha = val
+
+    @property
+    def desired_normalized_toroidal_flux(self):
+        return self.get_value_from_input_or_defaults("Geometry","desired_normalized_toroidal_flux")
     
+    @desired_normalized_toroidal_flux.setter
+    def desired_normalized_toroidal_flux(self,val):
+        self.changevar("Geometry","desired_normalized_toroidal_flux",val)
+
+    @property
+    def torflux(self): #stella compatibility
+        return self.desired_normalized_toroidal_flux
     
+    @torflux.setter
+    def torflux(self,val): #stella compatibility
+        self.desired_normalized_toroidal_flux = val
+
+    @property
+    def vmec_file(self):
+        return self.get_value_from_input_or_defaults("Geometry","vmec_file")
+    
+    @vmec_file.setter
+    def vmec_file(self,val):
+        self.changevar("Geometry","vmec_file",val)
+
+    @property 
+    def vmec_filename(self): #stella compatibility
+        return self.vmec_file
+    
+    @vmec_filename.setter
+    def vmec_filename(self,val): # stella compatibility
+        self.vmec_file = val
+    
+
+    @property
+    def npol(self):
+        return self.get_value_from_input_or_defaults("Geometry","npol")
+
+    @npol.setter
+    def npol(self,val):
+        self.changevar("Geometry","npol",val)
+
+        
 if __name__=="__main__":
 
     import sys

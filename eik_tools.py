@@ -335,7 +335,7 @@ class EikFile(object):
             # we copy every dataset individually
             
             with netcdf_file(output_filename,'w', maskandscale=False) as f:
-                f.createDimension('z', self.ntheta)
+                f.createDimension('z', self.ntheta+1) #YEAH! +1
 
                 #f.createVariable("theta",'f',('z',))
                 #theta[:] = self.theta[:]

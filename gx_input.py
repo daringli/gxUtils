@@ -1,28 +1,43 @@
 import numpy as np
 import toml
 
+groupnames = ["qspectra", "species", "dimensions", 'domain', "physics", "time", "initialization", "geometry", "species", "boltzmann", "dissipation", "expert", "forcing"]
+
+
+def val2str(val):
+    if type(val) == bool:
+        if val:
+            return 'true'
+        else:
+            return 'false'
+    else:
+        return str(val)
+
 def set_toml_variable(filename, group,var,value):
     with open(filename,'r') as f:
         lines = f.readlines()
+    group = group.lower()
     startGroup = None
     endGroup = None
     step = 0
-    searchstring = "["+group+"]"
-    print(searchstring)
+    searchstrings = ["["+group+"]"]
+    #print(searchstring)
     # preprocess to extract boundary of group
     for i,l in enumerate(lines):
         l = l.split('#',1)[0] # strip comments
-        if searchstring in l:
+        l = l.lower()
+        match = any([searchstring in l for searchstring in searchstrings])
+        if match:
             if step == 0:
                 startGroup = i
-                searchstring = "["
+                searchstrings = ["[" + gn + "]" for gn in groupnames]
                 step = 1
             elif step == 1:
                 endGroup = i
                 step = 2
                 break
 
-    print(startGroup,endGroup)
+    #print(startGroup,endGroup)
     for i,l in enumerate(lines[startGroup:endGroup]):
         ls = l.split('#',1)
         l = ls[0]
@@ -31,9 +46,9 @@ def set_toml_variable(filename, group,var,value):
                 lcomment = ls[1]
             else:
                 lcomment = ''
-            l = l.split('=')[0] + '= ' + str(value)
-            print(l + lcomment)
-            lines[startGroup + i] = l + " #" + lcomment + "\n"
+            l = l.split('=')[0] + '= ' + val2str(value)
+            #print(l + lcomment)
+            lines[startGroup + i] = l + " # " + lcomment.strip() + "\n"
 
     with open(filename,'w') as f:
         f.write(''.join(lines))
@@ -134,6 +149,28 @@ class Gx_input(object):
         self.changevar("Dimensions","nkx",val)
 
 
+        
+    @property
+    def nx(self):
+        return self.get_value_from_input_or_defaults("Dimensions","nx")
+
+    @nx.setter
+    def nx(self,val):
+        self.changevar("Dimensions","nx",val)
+
+            
+    @property
+    def ny(self):
+        return self.get_value_from_input_or_defaults("Dimensions","ny")
+
+    @ny.setter
+    def ny(self,val):
+        self.changevar("Dimensions","ny",val)
+
+
+    
+
+        
     @property
     def dt(self):
         return self.get_value_from_input_or_defaults("Time","dt")
@@ -142,8 +179,6 @@ class Gx_input(object):
     def dt(self,val):
         self.changevar("Time","dt",val)
 
-<<<<<<< HEAD
-<<<<<<<< HEAD:gx_input.py
     @property
     def alpha(self):
         return self.get_value_from_input_or_defaults("Geometry","alpha")
@@ -196,6 +231,24 @@ class Gx_input(object):
         self.changevar("Geometry","npol",val)
 
 
+    @property
+    def y0(self):
+        return self.get_value_from_input_or_defaults("Domain","y0")
+
+    @y0.setter
+    def y0(self,val):
+        self.changevar("Domain","y0",val)
+
+    
+    @property
+    def x0(self):
+        return self.get_value_from_input_or_defaults("Domain","x0")
+
+    @x0.setter
+    def x0(self,val):
+        self.changevar("Domain","x0",val)
+
+
 
     @property
     def vmec_file(self):
@@ -213,10 +266,116 @@ class Gx_input(object):
     def vmec_filename(self,val): # stella compatibility
         self.vmec_file = val
     
+    @property
+    def nspecies(self):
+        return self.get_value_from_input_or_defaults("Dimensions","nspecies")
+        
+    @nspecies.setter
+    def nspecies(self,val):
+        self.changevar("Dimensions","nspecies",val)
+        
+    @property
+    def tprim(self):
+        return np.array(self.get_value_from_input_or_defaults("species","tprim"))
+    
+    @tprim.setter
+    def tprim(self, val):
+        val = list(val)
+        #print(val)
+        if len(val) != self.nspecies:
+            print("Warning, setting tprim array to an array that doesn't have nspecies entries")
+        self.changevar("species","tprim",val)
 
+    @property
+    def fprim(self):
+        return np.array(self.get_value_from_input_or_defaults("species","fprim"))
+    
+    @fprim.setter
+    def fprim(self, val):
+        val = list(val)
+        #print(val)
+        if len(val) != self.nspecies:
+            print("Warning, setting fprim array to an array that doesn't have nspecies entries")
+        self.changevar("species","fprim",val)
+
+
+    @property
+    def z(self):
+        return np.array(self.get_value_from_input_or_defaults("species","z"))
+    
+    @z.setter
+    def z(self, val):
+        val = list(val)
+        #print(val)
+        if len(val) != self.nspecies:
+            print("Warning, setting z array to an array that doesn't have nspecies entries")
+        self.changevar("species","z",val)
+
+    
+    @property
+    def mass(self):
+        return np.array(self.get_value_from_input_or_defaults("species","mass"))
+    
+    @mass.setter
+    def mass(self, val):
+        val = list(val)
+        #print(val)
+        if len(val) != self.nspecies:
+            print("Warning, setting mass array to an array that doesn't have nspecies entries")
+        self.changevar("species","mass",val)
+
+
+    
+    @property
+    def Qspectra_kx(self):
+        return self.get_value_from_input_or_defaults("Qspectra","kx")
+    
+    @Qspectra_kx.setter
+    def Qspectra_kx(self, val):
+        self.changevar("Qspectra","kx",val)
+    
+    @property
+    def Qspectra_ky(self):
+        return self.get_value_from_input_or_defaults("Qspectra","ky")
+    
+    @Qspectra_ky.setter
+    def Qspectra_ky(self, val):
+        self.changevar("Qspectra","ky",val)
+
+    @property
+    def Qspectra_z(self):
+        return self.get_value_from_input_or_defaults("Qspectra","z")
+    
+    @Qspectra_z.setter
+    def Qspectra_z(self, val):
+        self.changevar("Qspectra","z",val)
+        
+    @property
+    def Qspectra_kxky(self):
+        return self.get_value_from_input_or_defaults("Qspectra","kxky")
+    
+    @Qspectra_kxky.setter
+    def Qspectra_kxky(self, val):
+        self.changevar("Qspectra","kxky",val)
+
+
+    @property
+    def all_zonal_scalars(self):
+        return self.get_value_from_input_or_defaults("Diagnostics","all_zonal_scalars")
+    
+    @all_zonal_scalars.setter
+    def all_zonal_scalars(self, val):
+        self.changevar("Diagnostics","all_zonal_scalars",val)
+    
+    @property
+    def all_zonal(self):
+        return self.get_value_from_input_or_defaults("Diagnostics","all_zonal")
+    
+    @all_zonal.setter
+    def all_zonal(self, val):
+        self.changevar("Diagnostics","all_zonal",val)
 
         
-
 if __name__=="__main__":
 
     import sys

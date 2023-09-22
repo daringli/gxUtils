@@ -375,7 +375,43 @@ class Gx_input(object):
     def all_zonal(self, val):
         self.changevar("Diagnostics","all_zonal",val)
 
+       
+    def ny(self):
+        return self.get_value_from_input_or_defaults("Dimensions","ny")
+
+    @ny.setter
+    def ny(self,val):
+        self.changevar("Dimensions","ny",val)
+
+    
+    @property
+    def nx(self):
+        return self.get_value_from_input_or_defaults("Dimensions","nx")
+
+    @nx.setter
+    def nx(self,val):
+        self.changevar("Dimensions","nx",val)
+
+    
+    @property
+    def x0(self):
+        return self.get_value_from_input_or_defaults("Domain","x0")
+
+    @x0.setter
+    def x0(self,val):
+        self.changevar("Domain","x0",val)
+
         
+    @property
+    def y0(self):
+        return self.get_value_from_input_or_defaults("Domain","y0")
+
+    @y0.setter
+    def y0(self,val):
+        self.changevar("Domain","y0",val)
+
+
+
 if __name__=="__main__":
 
     import sys

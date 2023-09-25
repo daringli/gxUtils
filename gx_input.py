@@ -167,10 +167,6 @@ class Gx_input(object):
     def ny(self,val):
         self.changevar("Dimensions","ny",val)
 
-
-    
-
-        
     @property
     def dt(self):
         return self.get_value_from_input_or_defaults("Time","dt")
@@ -374,23 +370,6 @@ class Gx_input(object):
     @all_zonal.setter
     def all_zonal(self, val):
         self.changevar("Diagnostics","all_zonal",val)
-
-       
-    def ny(self):
-        return self.get_value_from_input_or_defaults("Dimensions","ny")
-
-    @ny.setter
-    def ny(self,val):
-        self.changevar("Dimensions","ny",val)
-
-    
-    @property
-    def nx(self):
-        return self.get_value_from_input_or_defaults("Dimensions","nx")
-
-    @nx.setter
-    def nx(self,val):
-        self.changevar("Dimensions","nx",val)
 
     
     @property

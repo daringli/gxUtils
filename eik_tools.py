@@ -80,17 +80,18 @@ class EikFile(object):
                     print("scale" + str(self.scale))
                     
                     # we can init arrays since we know ntheta
-                    self.gbdrift = np.zeros(self.ntheta)
-                    self.gradpar = np.zeros(self.ntheta)
-                    self.grho = np.zeros(self.ntheta)
-                    self.theta = np.zeros(self.ntheta)
-                    self.cvdrift = np.zeros(self.ntheta)
-                    self.gds2 = np.zeros(self.ntheta)
-                    self.bmag = np.zeros(self.ntheta)
-                    self.gds21 = np.zeros(self.ntheta)
-                    self.gds22 = np.zeros(self.ntheta)
-                    self.cvdrift0 = np.zeros(self.ntheta)
-                    self.gbdrift0 = np.zeros(self.ntheta)
+                    # ntheta is always + 1 due to wanting it to be odd here
+                    self.gbdrift = np.zeros(self.ntheta+1)
+                    self.gradpar = np.zeros(self.ntheta+1)
+                    self.grho = np.zeros(self.ntheta+1)
+                    self.theta = np.zeros(self.ntheta+1)
+                    self.cvdrift = np.zeros(self.ntheta+1)
+                    self.gds2 = np.zeros(self.ntheta+1)
+                    self.bmag = np.zeros(self.ntheta+1)
+                    self.gds21 = np.zeros(self.ntheta+1)
+                    self.gds22 = np.zeros(self.ntheta+1)
+                    self.cvdrift0 = np.zeros(self.ntheta+1)
+                    self.gbdrift0 = np.zeros(self.ntheta+1)
                     
                     
                     state = 2 # search for next header
@@ -105,7 +106,7 @@ class EikFile(object):
                     self.grho[i] = float(ls[2])
                     self.theta[i] = float(ls[3])
                     i = i + 1
-                    if i == self.ntheta:
+                    if i == self.ntheta + 1:
                         state = 4 # search for next header
                         
                 elif state == 4:
@@ -118,7 +119,7 @@ class EikFile(object):
                     self.gds2[i] = float(ls[1])
                     self.bmag[i] = float(ls[2])
                     i = i + 1
-                    if i == self.ntheta:
+                    if i == self.ntheta + 1:
                         state = 6 # search for next header
 
                 elif state == 6:
@@ -130,7 +131,7 @@ class EikFile(object):
                     self.gds21[i] = float(ls[0])
                     self.gds22[i] = float(ls[1])
                     i = i + 1
-                    if i == self.ntheta:
+                    if i == self.ntheta + 1:
                         state = 8
 
                 elif state == 8:
@@ -142,7 +143,7 @@ class EikFile(object):
                     self.cvdrift0[i] = float(ls[0])
                     self.gbdrift0[i] = float(ls[1])
                     i = i + 1
-                    if i == self.ntheta:
+                    if i == self.ntheta + 1:
                         break # we are done
         
         
@@ -152,7 +153,7 @@ class EikFile(object):
         elif self.eiktype == 1:
             self._read_geometry_eik()
             
-        self.ntheta = len(self.theta)
+        #self.ntheta = len(self.theta)
 
     def create_arclength_variable(self):
         # self.attrib_interpolator('b_dot_grad_z', uncoord=False)
@@ -379,19 +380,19 @@ class EikFile(object):
         ret = ret + str(self.ntheta//2) + " 1 " + str(self.ntheta) + " 1.0 " +  header_format(self.Rmaj) + " " + header_format(self.shat) + " 1.0 " + header_format(self.q) + " "  + str(self.scale) + " \n"
         
         ret = ret + "gbdrift\t gradpar\t grho\t tgrid\n"
-        for i in range(self.ntheta):
+        for i in range(self.ntheta+1):
             ret = ret + table_format(self.gbdrift[i]) + "\t" + table_format(self.gradpar[i]) + "\t" + table_format(self.grho[i]) + "\t" + table_format(self.theta[i]) + "\n"
 
         ret = ret + "cvdrift\t gds2\t bmag\t tgrid\n"
-        for i in range(self.ntheta):
+        for i in range(self.ntheta+1):
             ret = ret + table_format(self.cvdrift[i]) + "\t" + table_format(self.gds2[i]) + "\t" + table_format(self.bmag[i]) + "\t" + table_format(self.theta[i]) + "\n"
 
         ret = ret + "gds21\t gds22\t tgrid\n"
-        for i in range(self.ntheta):
+        for i in range(self.ntheta+1):
             ret = ret + table_format(self.gds21[i]) + "\t" + table_format(self.gds22[i]) + "\t" + table_format(self.theta[i]) + "\n"
 
         ret = ret + "cvdrift0\t gbdrift0\t tgrid\n"
-        for i in range(self.ntheta):
+        for i in range(self.ntheta+1):
             ret = ret + table_format(self.cvdrift0[i]) + "\t" + table_format(self.gbdrift0[i]) + "\t" + table_format(self.theta[i]) + "\n"
 
             

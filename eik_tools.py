@@ -226,13 +226,13 @@ class EikFile(object):
         var.filename = self.wout
         
     def _write_scalar(self,f,variable):
-        f.createVariable(variable, 'f', ())
+        f.createVariable(variable, 'd', ())
         var = f.variables[variable]
         var.assignValue(getattr(self,variable))
         
         
     def _write_array(self,f,variable):
-        f.createVariable(variable, 'f', ('z',))
+        f.createVariable(variable, 'd', ('z',))
         var = f.variables[variable]
         var[:] = getattr(self,variable)
 

@@ -10,8 +10,9 @@ files = sys.argv[1:]
 for f in files:
     
     ef = EikFile(f)
-    ntheta = ef.ntheta
-
+    theta = ef.theta
+    ntheta = len(theta)
+    
     ys = np.zeros((8,ntheta))
     x = ef.scaled_theta/(np.pi)
     outputs = ["bmag", "gradpar", "gbdrift", "cvdrift", "cvdrift0", "gds2", "gds21", "gds22"]

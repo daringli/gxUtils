@@ -139,15 +139,19 @@ def batching_averages(t,Q, twindow):
 
 
 def get_Q(d, tf_fallback = None):
+    Qwindowavg = np.nan
+    Qavg = np.nan
+    Qvar = np.nan
+    Qwindowvar = np.nan
     try:
         tf = get_end_of_transient_time(d, twindow=twindow, mthreshold=mthreshold, sigmathreshold=sigmathreshold, plot = False)
     except np.linalg.LinAlgError:
         if tf_fallback is None:
             tf = np.nan
+            
         else:
             tf = tf_fallback
             
-    Qwindowavg = np.nan
     if not np.isnan(tf):
         Qi, t = get_Qi_t_nc(d)
         i_tf = np.argmax(t>tf)

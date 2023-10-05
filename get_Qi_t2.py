@@ -5,6 +5,7 @@ import numpy.ma as ma
 from glob import glob
 import os
 
+from decide_version import decide_version
 from netCDF4 import Dataset
 
 def get_Qi_t_stdout(dirname,stdout_file='out.*'):
@@ -26,28 +27,39 @@ def get_Qi_t_stdout(dirname,stdout_file='out.*'):
     return(np.array(Qi),np.array(t))
 
 
-def get_Qi_t_nc(dirname,ncfile='gx.nc'):
-    ncfile = dirname + "/" + ncfile
-    if os.path.isfile(ncfile):
-        with Dataset(ncfile,'r') as f:
+def get_dataset(ncfile,version):
+    with Dataset(ncfile,'r') as f:
+        if version == 1:
             #f.replace('--', np.nan)
             # Q_gB = n_i T_i v_{Ti} \rho_{Ti}^2/a^2
             Qi = f["/Fluxes/qflux"][()][:,0]/(2*np.sqrt(2))
             t = np.sqrt(2)*f.variables["time"][()]
+        else:
+            Qi = f["/Diagnostics/HeatFlux_st"][()][:,0]/(2*np.sqrt(2))
+            t = np.sqrt(2)*f.groups["Grids"].variables["time"][:]
+    return Qi,t
 
-        # remove invalid entries
-        # at the end of vector
-        # netcdf4 returns a masked array, not normal array. See
-        # https://numpy.org/doc/stable/reference/maskedarray.generic.html
-        #print(t.mask)
-        if ma.is_masked(t):
-            while t.mask[-1] == True:
-                t = t[:-1]
-                Qi = Qi[:-1]
-        ret = (np.array(Qi),np.array(t))
-    else:
-        print("File does not exist '" + ncfile + "'")
-        ret = (np.nan,np.nan)
+def get_Qi_t_nc(dirname, version=None):
+
+    ncfile, version = decide_version(dirname)
+    if ncfile is None:
+        print("GX output does not exist in '" + dirname + "'")
+        return (np.nan,np.nan)
+    Qi, t = get_dataset(ncfile,version)
+    
+    # remove invalid entries
+    # at the end of vector
+    # netcdf4 returns a masked array, not normal array. See
+    # https://numpy.org/doc/stable/reference/maskedarray.generic.html
+    #print(t.mask)
+    if ma.is_masked(t):
+        while t.mask[-1] == True:
+            t = t[:-1]
+            Qi = Qi[:-1]
+    ret = (np.array(Qi),np.array(t))
+        
+        
+      
     return ret
 
 

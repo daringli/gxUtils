@@ -44,8 +44,8 @@ def linear_regression_window(t,Q,twindow=50):
         cs[i] = c
     return tstarts, ms, cs, rmsd, avgQ
 
-def Q_linear_regression_in_dir(dirname,ncfile='gx.nc', twindow=50):
-    Qi, t = get_Qi_t_nc(dirname, ncfile)
+def Q_linear_regression_in_dir(dirname, twindow=50):
+    Qi, t = get_Qi_t_nc(dirname)
     if not np.isnan(Qi).all():
         tstarts, ms, cs, rmsd, avgQ = linear_regression_window(t,Qi,twindow)
         ret = tstarts, ms, cs, rmsd, avgQ
@@ -53,7 +53,7 @@ def Q_linear_regression_in_dir(dirname,ncfile='gx.nc', twindow=50):
         ret = (np.nan, np.nan, np.nan, np.nan, np.nan)
     return ret
 
-def get_end_of_transient_time(dirname, ncfile='gx.nc', twindow=50, mthreshold=mthreshold, sigmathreshold=sigmathreshold, plot = False, axes=None, color='b'):
+def get_end_of_transient_time(dirname, twindow=50, mthreshold=mthreshold, sigmathreshold=sigmathreshold, plot = False, axes=None, color='b'):
     tstarts, ms, cs, rmsd, avgQ = Q_linear_regression_in_dir(dirname,twindow=twindow)
     if not np.isnan(ms).all():
         i_m = np.argmax(ms < mthreshold)
@@ -176,7 +176,10 @@ def get_Q(d, tf_fallback = None):
             Qwindowavg, Qwindowvar[j] = batching_averages(t[i_tf:],Qi[i_tf:], twindows[j])
             tau[j] = twindows[j] * Qwindowvar[j]/Qvar
 
-    return Qavg, Qvar, Qwindowavg, Qwindowvar, tf
+        ret = Qavg, Qvar, Qwindowavg, Qwindowvar, tf
+    else:
+        ret = np.nan, np.nan, np.nan, np.nan, np.nan
+    return ret
     
 if __name__ == "__main__":
     import sys

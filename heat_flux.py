@@ -9,27 +9,27 @@ import matplotlib.pyplot as plt
 import sys
 from netCDF4 import Dataset
 
-def heat_flux(data, ispec=0, navgfac=0.5, label=None, plot=True, fig=None, Lref="a", refsp=None):
-    # read data from file
-    t = np.sqrt(2) * data.variables['time'][:]
-    try:
-        q = data.groups['Fluxes'].variables['qflux'][:,ispec]/(2*np.sqrt(2))
-    except:
-        print('Error: heat flux data was not written. Make sure to use \'fluxes = true\' in the input file.')
-    species_type = data.groups['Inputs'].groups['Species'].variables['species_type'][ispec]
-    if species_type == 0:
-        species_tag = "i"
-    elif species_type == 1:
-        species_tag = "e"
-    if refsp == None:
-        refsp = species_tag
+from get_Qi_t2 import get_Qi_t_nc
+
+
+def heat_flux(dirname, ispec=0, navgfac=0.5, label=None, plot=True, fig=None, Lref="a", refsp=None):
+
+    q, t = get_Qi_t_nc(dirname)
+    print(t)
+    #species_type = data.groups['Inputs'].groups['Species'].variables['species_type'][ispec]
+    #if species_type == 0:
+    #    species_tag = "i"
+    #elif species_type == 1:
+    #    species_tag = "e"
+    #if refsp == None:
+    species_tag='i'
 
     # compute time-average and std dev
     istart_avg = int(len(t)*navgfac)
     qavg = np.mean(q[istart_avg:])
     qstd = np.std(q[istart_avg:])
     if label == None:
-        label = data.filepath()
+        label = dirname
     print(r"%s: Q_%s/Q_GB = %.5g +/- %.5g" % (label, species_tag, qavg, qstd))
 
     # make a Q vs time plot
@@ -46,19 +46,9 @@ def heat_flux(data, ispec=0, navgfac=0.5, label=None, plot=True, fig=None, Lref=
 if __name__ == "__main__":
     
     print("Plotting heat fluxes.....")
+    ispec=0
     for fname in sys.argv[1:]:
-        if fname[-3:] != ".nc":
-            # default filename for outputs
-            fname = fname + "/gx.nc"
-        try:
-            data = Dataset(fname, mode='r')
-        except:
-            print(' usage: python heat_flux.py [list of .nc files]')
-
-        nspec = data.dimensions['s'].size
-    
-        for ispec in np.arange(nspec):
-            heat_flux(data, ispec=ispec, refsp="i")
+        heat_flux(fname, ispec=ispec, refsp="i")
     
     plt.xlim(0)
     plt.ylim(0)

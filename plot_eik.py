@@ -1,3 +1,5 @@
+#!/usr/bin/env python
+
 from eik_tools import EikFile
 import sys
 import matplotlib.pyplot as plt

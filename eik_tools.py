@@ -22,8 +22,9 @@ class EikFile(object):
             
 
     def _read_geometry_nc(self):
-        with netcdf_file(self.eikfile) as f:
+        with netcdf_file(self.eikfile, mmap=False) as f:
             self.theta =    f.variables['theta'][()]
+            self.ntheta =   len(self.theta) - 1
             self.bmag =     f.variables['bmag'][()]
             self.gradpar =  f.variables['gradpar'][()]
             self.grho  =    f.variables['grho'][()]

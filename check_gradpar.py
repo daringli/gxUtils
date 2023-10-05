@@ -11,4 +11,4 @@ if __name__ == "__main__":
 
 
     np.set_printoptions(32)
-    print(gradpar)
+    print(gradpar - np.mean(gradpar))

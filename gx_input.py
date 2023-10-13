@@ -99,9 +99,9 @@ class Gx_input(object):
         self.input_name = input_name
         self.full_input_name = dirname + "/" + input_name
         with open(self.full_input_name, "r") as f:
-            print(f.readlines())
+            #print(f.readlines())
             self.data = toml.load(f)
-            print(self.data)
+            #print(self.data)
             
     def get_value_from_input_or_defaults(self,groupname,varname):
         varname = varname
@@ -128,7 +128,6 @@ class Gx_input(object):
     def changevar(self, group, var, val):
         set_toml_variable(self.full_input_name,group,var,val)
         with open(self.full_input_name, "r") as f:
-            l = f.readlines()
             self.data = toml.load(f)
 
 

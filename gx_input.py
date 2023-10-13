@@ -99,8 +99,10 @@ class Gx_input(object):
         self.input_name = input_name
         self.full_input_name = dirname + "/" + input_name
         with open(self.full_input_name, "r") as f:
+            print(f.readlines())
             self.data = toml.load(f)
-
+            print(self.data)
+            
     def get_value_from_input_or_defaults(self,groupname,varname):
         varname = varname
         groupname = groupname
@@ -126,6 +128,7 @@ class Gx_input(object):
     def changevar(self, group, var, val):
         set_toml_variable(self.full_input_name,group,var,val)
         with open(self.full_input_name, "r") as f:
+            l = f.readlines()
             self.data = toml.load(f)
 
 
@@ -391,6 +394,16 @@ class Gx_input(object):
 
 
     @property
+    def t_max(self):
+        return self.get_value_from_input_or_defaults("Time","t_max")
+
+    @t_max.setter
+    def t_max(self,val):
+        self.changevar("Time","t_max",val)
+
+
+        
+    @property
     def geo_option(self):
         return self.get_value_from_input_or_defaults("Geometry","geo_option")
 
@@ -497,6 +510,14 @@ class Gx_input(object):
     @nperiod.setter
     def nperiod(self,val):
         self.changevar("Dimensions","nperiod",val)
+
+    @property
+    def boundary(self):
+        return self.get_value_from_input_or_defaults("Domain","boundary")
+
+    @boundary.setter
+    def boundary(self,val):
+        self.changevar("Domain","boundary",val)
 
 
 

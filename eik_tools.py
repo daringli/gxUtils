@@ -1,9 +1,9 @@
 #!/usr/bin/env python
 
-from scipy.io import netcdf_file
+#from scipy.io import netcdf_file
 from scipy.interpolate import interp1d
 import numpy as np
-#from netcdf_util import netcdf_file
+from netcdf_util import netcdf_file
 
 class EikFile(object):
 
@@ -38,7 +38,11 @@ class EikFile(object):
             # scalars
             self.kxfac =    f.variables['kxfac'][()]
             self.q =        f.variables['q'][()]
-            self.scale =    float(f.variables['scale'][()])
+            try:
+                self.scale =    float(f.variables['scale'][()])
+            except KeyError:
+                # for miller geometry, etc
+                self.scale = 1 
             if np.fabs(self.scale - np.round(self.scale)) < 1e-3:
                 # probably meant to be an integer
                 self.scale = int(np.round(self.scale))
@@ -46,8 +50,11 @@ class EikFile(object):
             self.shat =     f.variables['shat'][()]
             self.drhodpsi = f.variables['drhodpsi'][()]
             # metadata
-            self.wout =     f.variables['wout'].filename
-
+            try:
+                self.wout =     f.variables['wout'].filename
+            except KeyError:
+                # for Miller geometry, etc
+                self.wout = None
     def _read_geometry_eik(self):
         with open(self.eikfile, 'r') as f:
             lines = f.readlines()
@@ -74,7 +81,10 @@ class EikFile(object):
                     self.shat = float(ls[5])
                     self.kxfac = float(ls[6])
                     self.q = float(ls[7])
-                    self.scale = float(ls[8])
+                    if len(ls) == 9:
+                        self.scale = float(ls[8])
+                    else:
+                        self.scale = 1.0
                     if np.fabs(self.scale - np.round(self.scale)) < 1e-3:
                         # probably meant to be an integer
                         self.scale = int(np.round(self.scale))

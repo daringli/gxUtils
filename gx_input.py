@@ -390,6 +390,117 @@ class Gx_input(object):
         self.changevar("Domain","y0",val)
 
 
+    @property
+    def geo_option(self):
+        return self.get_value_from_input_or_defaults("Geometry","geo_option")
+
+    @geo_option.setter
+    def geo_option(self,val):
+        self.changevar("Geometry","geo_option",val)
+
+
+    # MILLER GEOM
+    @property
+    def rhoc(self):
+        return self.get_value_from_input_or_defaults("Geometry","rhoc")
+
+    @rhoc.setter
+    def rhoc(self,val):
+        self.changevar("Geometry","rhoc",val)
+
+
+    @property
+    def shat(self):
+        return self.get_value_from_input_or_defaults("Geometry","shat")
+
+    @shat.setter
+    def shat(self,val):
+        self.changevar("Geometry","shat",val)
+
+
+    @property
+    def Rmaj(self):
+        return self.get_value_from_input_or_defaults("Geometry","Rmaj")
+
+    @Rmaj.setter
+    def Rmaj(self,val):
+        self.changevar("Geometry","Rmaj",val)
+
+    @property
+    def R_geo(self):
+        return self.get_value_from_input_or_defaults("Geometry","R_geo")
+
+    @R_geo.setter
+    def R_geo(self,val):
+        self.changevar("Geometry","R_geo",val)
+
+    @property
+    def shift(self):
+        return self.get_value_from_input_or_defaults("Geometry","shift")
+
+    @shift.setter
+    def shift(self,val):
+        self.changevar("Geometry","shift",val)
+
+    @property
+    def qinp(self):
+        return self.get_value_from_input_or_defaults("Geometry","qinp")
+
+    @qinp.setter
+    def qinp(self,val):
+        self.changevar("Geometry","qinp",val)
+
+    @property
+    def akappa(self):
+        return self.get_value_from_input_or_defaults("Geometry","akappa")
+
+    @akappa.setter
+    def akappa(self,val):
+        self.changevar("Geometry","akappa",val)
+
+    @property
+    def akappri(self):
+        return self.get_value_from_input_or_defaults("Geometry","akappri")
+
+    @akappri.setter
+    def akappri(self,val):
+        self.changevar("Geometry","akappri",val)
+
+    @property
+    def tri(self):
+        return self.get_value_from_input_or_defaults("Geometry","tri")
+
+    @tri.setter
+    def tri(self,val):
+        self.changevar("Geometry","tri",val)
+
+    @property
+    def tripri(self):
+        return self.get_value_from_input_or_defaults("Geometry","tripri")
+
+    @tripri.setter
+    def tripri(self,val):
+        self.changevar("Geometry","tripri",val)
+
+    @property
+    def betaprim(self):
+        return self.get_value_from_input_or_defaults("Geometry","betaprim")
+
+    @betaprim.setter
+    def betaprim(self,val):
+        self.changevar("Geometry","betaprim",val)
+
+    @property
+    def nperiod(self):
+        return self.get_value_from_input_or_defaults("Dimensions","nperiod")
+
+    @nperiod.setter
+    def nperiod(self,val):
+        self.changevar("Dimensions","nperiod",val)
+
+
+
+    
 
 if __name__=="__main__":
 

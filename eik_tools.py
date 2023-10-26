@@ -7,8 +7,8 @@ from netcdf_util import netcdf_file
 
 class EikFile(object):
 
-    extrapol_fudge = 1e-10
-    attribs = ['bmag', 'gbdrift', 'gbdrift0', 'cvdrift', 'cvdrift0', 'gds2', 'gds21', 'gds22']
+    extrapol_fudge = 1e-6
+    attribs = ['bmag', 'gbdrift', 'gbdrift0', 'cvdrift', 'cvdrift0', 'gds2', 'gds21', 'gds22', 'gradpar']
     
     def __init__(self, eikfile = 'eik.out'):
         self.eikfile = eikfile
@@ -54,13 +54,13 @@ class EikFile(object):
                 self.wout =     f.variables['wout'].filename
             except KeyError:
                 # for Miller geometry, etc
-                self.wout = None
+                self.wout = ""
     def _read_geometry_eik(self):
         with open(self.eikfile, 'r') as f:
             lines = f.readlines()
 
         # this metadata is missing in the eikfile
-        self.wout = None
+        self.wout = ""
         
         state = 0 # find header
         for l in lines:
@@ -251,6 +251,9 @@ class EikFile(object):
     
 
     
+    def multiply_attrib(self, attrib, factor):
+        attr = getattr(self, attrib)
+        setattr(self, attrib, attr * factor)
 
     def avg_attrib(self, attrib):
         attr = getattr(self, attrib)
@@ -280,6 +283,10 @@ class EikFile(object):
 
     def avg_gds22(self):
         return self.avg_attrib('gds22')
+
+    def avg_gradpar(self):
+        return self.avg_attrib('gradpar')
+
     
     
     def attrib_interpolator(self, attrib, coord='L'):
@@ -304,11 +311,17 @@ class EikFile(object):
     def copy_attrib(self, copyFromEikFile, attrib, coord='L'):
         tmp = copyFromEikFile.attrib_interpolator(attrib, coord)
         if coord=='L':
-            setattr(self,attrib,tmp(self.L))
+            tmp2 = attrib,tmp(self.theta)
         elif (coord=='zed' or coord=='z' or coord=='theta'):
-            setattr(self,attrib,tmp(self.theta))
+            tmp2 = attrib,tmp(self.theta)
         elif coord=='scaled_theta':
-            setattr(self,attrib,tmp(self.scaled_theta))
+            try:
+                tmp2 = tmp(self.scaled_theta)
+            except ValueError as e:
+                print(copyFromEikFile.scaled_theta)
+                print(self.scaled_theta)
+                raise e
+        setattr(self,attrib,tmp2)
 
     def copy_bmag(self, copyFromEikFile, coord='L'):
         self.copy_attrib(copyFromEikFile, 'bmag', coord)
@@ -335,6 +348,10 @@ class EikFile(object):
     def copy_gds22(self, copyFromEikFile, coord='L'):
         self.copy_attrib(copyFromEikFile, 'gds22', coord)
 
+    def copy_gradpar(self, copyFromEikFile, coord='L'):
+        self.copy_attrib(copyFromEikFile, 'gradpar', coord)
+
+        
     def write_output(self,output_filename, netcdf = None):
         if netcdf is None:
             if self.eiktype == 2:
@@ -431,7 +448,13 @@ if __name__ == "__main__":
 
     for attrib in EikFile.attribs:
         parser.add_argument("--" + attrib, action='store', help="An eikfile to copy " + attrib +" from.", metavar='eikfile',dest=attrib)
+
+
     
+    for attrib in EikFile.attribs:
+        parser.add_argument("--m-" + attrib, action='store', help="Multiply " + attrib +" by factor.", metavar='factor', dest="m_" + attrib)
+
+        
     args = parser.parse_args()
 
     nfilenames = len(args.eikfiles)
@@ -444,11 +467,14 @@ if __name__ == "__main__":
         exit(1)
 
     override_eikfiles = {}
+    multiply_factors = {}
     for attrib in EikFile.attribs:
         inzero = attrib in args.zeros
         inavg = attrib in args.avgs
         copy_eikfile = getattr(args,attrib)
-        override = copy_eikfile is not None
+        factor = getattr(args,"m_" + attrib)
+        override = (copy_eikfile is not None)
+        multiply =  (factor is not None)
         if inzero and inavg and override:
             print("Cannot both set " + attrib + " to zero AND its average AND copy it from eikfile '" + copy_eikfile + "'.")
             exit(1)
@@ -464,7 +490,8 @@ if __name__ == "__main__":
 
         if override:
             override_eikfiles[attrib] = EikFile(copy_eikfile)
-            
+        if multiply:
+            multiply_factors[attrib] = float(factor)
             
 
     for i,filename in enumerate(args.eikfiles):
@@ -479,6 +506,9 @@ if __name__ == "__main__":
         for attrib_to_avg in args.avgs:
             setattr(eik, attrib_to_avg, eik.avg_attrib(attrib_to_avg) * o)
 
+        for attrib_to_multiply in multiply_factors:
+            eik.multiply_attrib(attrib_to_multiply, multiply_factors[attrib_to_multiply])
+            
         for attrib_to_override in override_eikfiles:
             eik.copy_attrib(override_eikfiles[attrib_to_override], attrib_to_override, coord=args.coord)
             

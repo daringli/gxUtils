@@ -11,7 +11,7 @@ from gx_input import Gx_input as GK_input
 from scipy.integrate import cumtrapz
 
 
-def plot_GK_input(dirname, axes=None, n=999, coord='L', variables=[], preset = 1, normalization='code', npol=6):
+def plot_GK_input(dirname, axes=None, n=999, coord='L', variables=[], preset = 2, normalization='code', npol=6):
 
     d = dirname
 

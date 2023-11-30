@@ -6,6 +6,7 @@ import scipy.stats as stats
 import sys
 
 from netCDF4 import Dataset
+from decide_version import decide_version
 
 sqrt2 = np.sqrt(2)
 
@@ -27,31 +28,43 @@ def get_kx_width(d, factor = 0.01, ispec=0, navgfac=0.5, output = "gx.nc"):
 
   
     
-def get_Qkx(d, ispec=0, navgfac=0.5, label=None, plot=False, ax=None, Lref="a", refsp=None, output="gx.nc"):
-    if d[-3:] != ".nc":
-        # default filename for outputs
-        fname = d + "/" + output
-    else:
-        fname = d
+def get_Qkx(d, ispec=0, navgfac=0.5, label=None, plot=False, ax=None, Lref="a", refsp=None):
+    if d[-3:] == ".nc":
+        d = d.rsplit('/',1)[0]
+    ncfile, version = decide_version(d)
 
-    data = Dataset(fname, mode='r')
-    t = sqrt2 * data.variables['time'][:]
-    kx = sqrt2 * data.variables['kx'][:]
+    if version == 1:
+        time_str = "time"
+        kx_str = "kx"
+        Qkx_str = "/Spectra/Qkxst"
+        
+    else:
+        time_str = "Grids/time"
+        kx_str = "Grids/kx"
+        Qkx_str = "/Diagnostics/HeatFlux_kxst"
+
+
+    data = Dataset(ncfile, mode='r')
+    t = sqrt2 * data[time_str][:]
+    kx = sqrt2 * data[kx_str][:]
+    #print(t)
+    #print(version)
     try:
-        Qkxt = data.groups['Spectra'].variables['Qkxst'][:,0,:]/(2*sqrt2)
-    except KeyError:
-        print("error for '"  +fname +"', Skipping.")
+        Qkxt = data[Qkx_str][:,0,:]/(2*sqrt2)
+    except (KeyError, IndexError):
+        print("error for '"  +ncfile +"', Skipping.")
         Qkx = np.nan * np.zeros(len(kx))
     else:
         istart_avg = int(len(t)*navgfac)
         Qkx = np.mean(Qkxt[istart_avg:], axis=0)
-        
+
+
+    
     if plot:
         if ax is None:
             fig, ax  =plt.subplots(1)
+        print("!!! " + str(Qkx))
         ax.plot(kx,Qkx,'o-')
-    
-        
     return kx, Qkx
 
     
@@ -63,13 +76,7 @@ if __name__ == "__main__":
     fig, ax = plt.subplots(1)
     
     for fname in sys.argv[1:]:
-        if fname[-3:] != ".nc":
-            # default filename for outputs
-            fname = fname + "/gx.nc"
-        try:
-            kx, Qkx = get_Qkx(fname, ax=ax, plot=True)
-        except:
-            print(' usage: python plot_Qkx.py [list of .nc files or dirs with gx.nc files]')
+        kx, Qkx = get_Qkx(fname, ax=ax, plot=True)
 
     ax.set_yscale('log')
     #ax.set_xscale('log')
@@ -77,7 +84,7 @@ if __name__ == "__main__":
     #ax.set_xlim(left=0)
     ax.set_ylim(bottom=0)
     refsp = 'i'
-    ax.set_xlabel(r'$k_y \rho_{%s}$' % refsp)
+    ax.set_xlabel(r'$k_x \rho_{%s}$' % refsp)
     ax.set_ylabel(r"$Q/Q_\mathrm{GB}$")
     #plt.xscale('log')
     

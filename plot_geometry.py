@@ -24,7 +24,7 @@ def get_geometry(dirname):
         with Dataset(ncfile,'r') as f:
             theta = f[theta_str][()]
             ntheta = len(theta)
-            outputs = ["bmag", "gradpar", "gbdrift", "cvdrift", "cvdrift0", "gds2", "gds21", "gds22"]
+            outputs = ["bmag", "gradpar", "gbdrift", "cvdrift", "cvdrift0", "gds2", "gds21", "gds22", 'jacobian']
             for output in outputs:
                 y = f["/Geometry/" + output][()]
                 print(output)
@@ -47,7 +47,7 @@ if __name__ == "__main__":
         ds = ['.']
 
     #fig, ax = plt.subplots()
-    fig, axes = plt.subplots(4,2, sharex=True)
+    fig, axes = plt.subplots(5,2, sharex=True)
     axes = axes.flatten()
     Ndirs = len(ds)
     cmap = plt.get_cmap("brg",Ndirs)
@@ -56,14 +56,15 @@ if __name__ == "__main__":
     
     
     for i,d in enumerate(ds):
-        theta,bmag, gradpar, gbdrift, cvdrift, cvdrift0, gds2, gds21, gds22 = get_geometry(d)
-        outputs = [bmag, gradpar, gbdrift, cvdrift, cvdrift0, gds2, gds21, gds22]
+        theta,bmag, gradpar, gbdrift, cvdrift, cvdrift0, gds2, gds21, gds22, jacobian = get_geometry(d)
+        outputs = [bmag, gradpar, gbdrift, cvdrift, cvdrift0, gds2, gds21, gds22, jacobian]
+        names = ["bmag", "gradpar", "gbdrift", "cvdrift", "cvdrift0", "gds2", "gds21", "gds22", 'jacobian']
         for j,o in enumerate(outputs):
             if not np.isnan(o).all():
                 print(j)
                 print(o.shape)
                 axes[j].plot(theta,o,color=cmap(i))
-                axes[j].set_title("")
+                axes[j].set_title(names[j])
         legend.append(d)
 
     axes[-2].set_xlabel(r"$\theta/\pi$")

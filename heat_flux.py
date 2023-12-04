@@ -13,8 +13,11 @@ from get_Qi_t2 import get_Qi_t_nc
 
 
 def heat_flux(dirname, ispec=0, navgfac=0.5, label=None, plot=True, fig=None, Lref="a", refsp=None):
-
-    q, t = get_Qi_t_nc(dirname)
+    try:
+        q, t = get_Qi_t_nc(dirname)
+    except:
+        q = np.array([np.nan])
+        t = np.array([np.nan])
     print(t)
     #species_type = data.groups['Inputs'].groups['Species'].variables['species_type'][ispec]
     #if species_type == 0:
@@ -36,12 +39,16 @@ def heat_flux(dirname, ispec=0, navgfac=0.5, label=None, plot=True, fig=None, Lr
     if plot:
         if fig == None:
             fig = plt.figure(0)
-        plt.plot(t,q,'-',label=r"%s: $Q_%s/Q_\mathrm{GB}$ = %.5g"%(label, species_tag, qavg))
-        plt.ylabel(r"$Q/Q_\mathrm{GB}$")
-        plt.xlabel(r"$t\ (v_{t%s}/%s)$"%(refsp, Lref))
-        legend = plt.legend(loc='upper right')
-        legend.set_in_layout(False)
-        plt.tight_layout()
+        try:
+            plt.plot(t,q,'-',label=r"%s: $Q_%s/Q_\mathrm{GB}$ = %.5g"%(label, species_tag, qavg))
+        except:
+            pass
+        else:
+            plt.ylabel(r"$Q/Q_\mathrm{GB}$")
+            plt.xlabel(r"$t\ (v_{t%s}/%s)$"%(refsp, Lref))
+            legend = plt.legend(loc='upper right')
+            legend.set_in_layout(False)
+            plt.tight_layout()
 
 if __name__ == "__main__":
     

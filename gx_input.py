@@ -401,7 +401,7 @@ class Gx_input(object):
         self.changevar("Time","t_max",val)
 
 
-        
+    
     @property
     def geo_option(self):
         return self.get_value_from_input_or_defaults("Geometry","geo_option")
@@ -409,6 +409,16 @@ class Gx_input(object):
     @geo_option.setter
     def geo_option(self,val):
         self.changevar("Geometry","geo_option",val)
+
+
+    
+    @property
+    def geo_file(self):
+        return self.get_value_from_input_or_defaults("Geometry","geo_file")
+
+    @geo_file.setter
+    def geo_file(self,val):
+        self.changevar("Geometry","geo_file",val)
 
 
     # MILLER GEOM

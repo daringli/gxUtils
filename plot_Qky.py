@@ -39,15 +39,21 @@ def get_Qky(d, ispec=0, navgfac=0.5, label=None, plot=False, ax=None, Lref="a", 
         time_str = "Grids/time"
         ky_str = "Grids/ky"
         Qky_str = "/Diagnostics/HeatFlux_kyst"
-    
-    data = Dataset(ncfile, mode='r')
+
+    try: 
+        data = Dataset(ncfile, mode='r')
+    except FileNotFoundError:
+        ky = np.array([np.nan])
+        Qky = np.array([np.nan])
+        return ky, Qky
+        
     t = sqrt2 * data[time_str][:]
     ky = sqrt2 * data[ky_str][:]
     #print(t)
     #print(version)
     try:
         Qkyt = data[Qky_str][:,0,:]/(2*sqrt2)
-    except KeyError:
+    except (KeyError, IndexError):
         print("error for '"  +ncfile +"', Skipping.")
         Qky = np.nan * np.zeros(len(ky))
     else:
@@ -68,13 +74,23 @@ def get_Qky(d, ispec=0, navgfac=0.5, label=None, plot=False, ax=None, Lref="a", 
     
 
 if __name__ == "__main__":
+
+    import argparse
+
+    parser = argparse.ArgumentParser()
+    parser.add_argument("simdirs", nargs="+", metavar='simdir', help='Simulation directories from which to read GX outputs from.', default=['.'])
+    parser.add_argument("-o","--output", nargs="?", action='store', metavar='filename',  help='Optional filename to save output to.', default = None)
     
     print("Plotting Qky fluxes.....")
 
     fig, ax = plt.subplots(1)
+
+
+    args = parser.parse_args()
     
-    for fname in sys.argv[1:]:
-        ky, Qky = get_Qky(fname, ax=ax, plot=True)
+    
+    for d in args.simdirs:
+        ky, Qky = get_Qky(d, ax=ax, plot=True)
         
     ax.set_yscale('log')
     ax.set_xscale('log')
@@ -88,5 +104,8 @@ if __name__ == "__main__":
     
     
     plt.tight_layout()
-    plt.legend(sys.argv[1:])
-    plt.show()
+    plt.legend(args.simdirs)
+    if args.output is not None:
+        plt.savefig(args.output)
+    else:
+        plt.show()

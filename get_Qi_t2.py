@@ -32,10 +32,18 @@ def get_dataset(ncfile,version):
         if version == 1:
             #f.replace('--', np.nan)
             # Q_gB = n_i T_i v_{Ti} \rho_{Ti}^2/a^2
-            Qi = f["/Fluxes/qflux"][()][:,0]/(2*np.sqrt(2))
+            try:
+                Qi = f["/Fluxes/qflux"][()][:,0]/(2*np.sqrt(2))
+            except IndexError:
+                Qi = np.array([np.nan])
+                t = np.array([np.nan])
             t = np.sqrt(2)*f.variables["time"][()]
         else:
-            Qi = f["/Diagnostics/HeatFlux_st"][()][:,0]/(2*np.sqrt(2))
+            try:
+                Qi = f["/Diagnostics/HeatFlux_st"][()][:,0]/(2*np.sqrt(2))
+            except IndexError:
+                Qi = np.array([np.nan])
+                t = np.array([np.nan])
             t = np.sqrt(2)*f.groups["Grids"].variables["time"][:]
     return Qi,t
 

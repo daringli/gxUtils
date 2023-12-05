@@ -28,9 +28,13 @@ def heat_flux(dirname, ispec=0, navgfac=0.5, label=None, plot=True, fig=None, Lr
     species_tag='i'
 
     # compute time-average and std dev
-    istart_avg = int(len(t)*navgfac)
-    qavg = np.mean(q[istart_avg:])
-    qstd = np.std(q[istart_avg:])
+    try:
+        istart_avg = int(len(t)*navgfac)
+    except TypeError:
+        return
+    else:
+        qavg = np.mean(q[istart_avg:])
+        qstd = np.std(q[istart_avg:])
     if label == None:
         label = dirname
     print(r"%s: Q_%s/Q_GB = %.5g +/- %.5g" % (label, species_tag, qavg, qstd))
@@ -51,14 +55,28 @@ def heat_flux(dirname, ispec=0, navgfac=0.5, label=None, plot=True, fig=None, Lr
             plt.tight_layout()
 
 if __name__ == "__main__":
+
+    import argparse
+
+    parser = argparse.ArgumentParser()
+    parser.add_argument("simdirs", nargs="+", metavar='simdir', help='Simulation directories from which to read GX outputs from.', default=['.'])
+    parser.add_argument("-o","--output", nargs="?", action='store', metavar='filename',  help='Optional filename to save output to.', default = None)
     
+
+    
+
+    args = parser.parse_args()
+
     print("Plotting heat fluxes.....")
     ispec=0
-    for fname in sys.argv[1:]:
-        heat_flux(fname, ispec=ispec, refsp="i")
+    for d in args.simdirs:
+        heat_flux(d, ispec=ispec, refsp="i")
     
     plt.xlim(0)
     plt.ylim(0)
     # uncomment this line to save a PNG image of the plot
     #plt.savefig("heat_flux.png")
-    plt.show()
+    if args.output is not None:
+        plt.savefig(args.output)
+    else:
+        plt.show()

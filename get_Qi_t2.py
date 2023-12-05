@@ -28,6 +28,10 @@ def get_Qi_t_stdout(dirname,stdout_file='out.*'):
 
 
 def get_dataset(ncfile,version):
+
+    if not os.path.isfile(ncfile):
+        return np.array([np.nan]), np.array([np.nan])
+    
     with Dataset(ncfile,'r') as f:
         if version == 1:
             #f.replace('--', np.nan)

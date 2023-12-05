@@ -44,7 +44,13 @@ def get_Qkx(d, ispec=0, navgfac=0.5, label=None, plot=False, ax=None, Lref="a", 
         Qkx_str = "/Diagnostics/HeatFlux_kxst"
 
 
-    data = Dataset(ncfile, mode='r')
+
+    try: 
+        data = Dataset(ncfile, mode='r')
+    except FileNotFoundError:
+        kx = np.array([np.nan])
+        Qkx = np.array([np.nan])
+        return kx, Qkx
     t = sqrt2 * data[time_str][:]
     kx = sqrt2 * data[kx_str][:]
     #print(t)
@@ -64,19 +70,29 @@ def get_Qkx(d, ispec=0, navgfac=0.5, label=None, plot=False, ax=None, Lref="a", 
         if ax is None:
             fig, ax  =plt.subplots(1)
         print("!!! " + str(Qkx))
-        ax.plot(kx,Qkx,'o-')
+        ax.plot(kx,Qkx,'o-', markersize=0.3)
     return kx, Qkx
 
     
 
 if __name__ == "__main__":
+
+    import argparse
+
+    parser = argparse.ArgumentParser()
+    parser.add_argument("simdirs", nargs="+", metavar='simdir', help='Simulation directories from which to read GX outputs from.', default=['.'])
+    parser.add_argument("-o","--output", nargs="?", action='store', metavar='filename',  help='Optional filename to save output to.', default = None)
+    
+    args = parser.parse_args()
+
+    
     
     print("Plotting Qkx fluxes.....")
 
     fig, ax = plt.subplots(1)
     
-    for fname in sys.argv[1:]:
-        kx, Qkx = get_Qkx(fname, ax=ax, plot=True)
+    for d in args.simdirs:
+        kx, Qkx = get_Qkx(d, ax=ax, plot=True)
 
     ax.set_yscale('log')
     #ax.set_xscale('log')
@@ -90,5 +106,10 @@ if __name__ == "__main__":
     
     
     plt.tight_layout()
-    plt.legend(sys.argv[1:])
-    plt.show()
+    plt.legend(args.simdirs)
+    if args.output is not None:
+        plt.savefig(args.output)
+    else:
+        plt.show()
+
+    

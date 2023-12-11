@@ -66,7 +66,9 @@ def get_Qky(d, ispec=0, navgfac=0.5, label=None, plot=False, ax=None, Lref="a", 
         if ax is None:
             fig, ax  =plt.subplots(1)
         print("!!! " + str(Qky))
-        ax.plot(ky,Qky,'o-')
+        if label == None:
+            label = d
+        ax.plot(ky,Qky,marker='.', label=label,markersize=0.3)
     
         
     return ky, Qky
@@ -80,6 +82,7 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("simdirs", nargs="+", metavar='simdir', help='Simulation directories from which to read GX outputs from.', default=['.'])
     parser.add_argument("-o","--output", nargs="?", action='store', metavar='filename',  help='Optional filename to save output to.', default = None)
+    parser.add_argument("-l","--legend", nargs="*", action='store', metavar='label',  help='Optional list of labels for legends', default = [])
     
     print("Plotting Qky fluxes.....")
 
@@ -88,9 +91,14 @@ if __name__ == "__main__":
 
     args = parser.parse_args()
     
+    Nl = len(args.legend)
     
-    for d in args.simdirs:
-        ky, Qky = get_Qky(d, ax=ax, plot=True)
+    for i, d in enumerate(args.simdirs):
+        if i < Nl:
+            label = args.legend[i]
+        else:
+            label = None
+        ky, Qky = get_Qky(d, ax=ax, plot=True, label=label)
         
     ax.set_yscale('log')
     ax.set_xscale('log')
@@ -101,10 +109,10 @@ if __name__ == "__main__":
     ax.set_xlabel(r'$k_y \rho_{%s}$' % refsp)
     ax.set_ylabel(r"$Q/Q_\mathrm{GB}$")
     #plt.xscale('log')
+    legend = plt.legend()
     
     
     plt.tight_layout()
-    plt.legend(args.simdirs)
     if args.output is not None:
         plt.savefig(args.output)
     else:

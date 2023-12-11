@@ -61,6 +61,7 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("simdirs", nargs="+", metavar='simdir', help='Simulation directories from which to read GX outputs from.', default=['.'])
     parser.add_argument("-o","--output", nargs="?", action='store', metavar='filename',  help='Optional filename to save output to.', default = None)
+    parser.add_argument("-l","--legend", nargs="*", action='store', metavar='label',  help='Optional list of labels for legends', default = [])
     
 
     
@@ -69,8 +70,13 @@ if __name__ == "__main__":
 
     print("Plotting heat fluxes.....")
     ispec=0
-    for d in args.simdirs:
-        heat_flux(d, ispec=ispec, refsp="i")
+    Nl = len(args.legend)
+    for i, d in enumerate(args.simdirs):
+        if i < Nl:
+            label = args.legend[i]
+        else:
+            label = None
+        heat_flux(d, ispec=ispec, refsp="i", label=label)
     
     plt.xlim(0)
     plt.ylim(0)

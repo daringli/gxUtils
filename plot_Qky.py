@@ -46,6 +46,9 @@ def get_Qky(d, ispec=0, navgfac=0.5, label=None, plot=False, ax=None, Lref="a", 
         ky = np.array([np.nan])
         Qky = np.array([np.nan])
         return ky, Qky
+
+    if label == None:
+        label = d
         
     t = sqrt2 * data[time_str][:]
     ky = sqrt2 * data[ky_str][:]
@@ -56,20 +59,23 @@ def get_Qky(d, ispec=0, navgfac=0.5, label=None, plot=False, ax=None, Lref="a", 
     except (KeyError, IndexError):
         print("error for '"  +ncfile +"', Skipping.")
         Qky = np.nan * np.zeros(len(ky))
+        return ky, Qky
     else:
         istart_avg = int(len(t)*navgfac)
         Qky = np.mean(Qkyt[istart_avg:], axis=0)
 
-
+    if np.all(np.isnan(Qky)):
+        print("All nan for '"  +ncfile +"', Skipping.")
+        return ky, Qky
     
     if plot:
         if ax is None:
             fig, ax  =plt.subplots(1)
-        print("!!! " + str(Qky))
-        if label == None:
-            label = d
-        ax.plot(ky,Qky,marker='.', label=label,markersize=0.3)
-    
+        try:
+            ax.plot(ky,Qky,marker='.', label=label,markersize=0.3)
+        except:
+            pass
+            
         
     return ky, Qky
 
@@ -88,9 +94,9 @@ if __name__ == "__main__":
 
     fig, ax = plt.subplots(1)
 
-
+    refsp = 'i'
+    ispec = 0
     args = parser.parse_args()
-    
     Nl = len(args.legend)
     
     for i, d in enumerate(args.simdirs):
@@ -98,21 +104,18 @@ if __name__ == "__main__":
             label = args.legend[i]
         else:
             label = None
-        ky, Qky = get_Qky(d, ax=ax, plot=True, label=label)
+        get_Qky(d, ax=ax, plot=True, label=label, refsp = refsp, ispec=ispec)
         
     ax.set_yscale('log')
     ax.set_xscale('log')
-    
     ax.set_xlim(left=0)
     ax.set_ylim(bottom=0)
-    refsp = 'i'
     ax.set_xlabel(r'$k_y \rho_{%s}$' % refsp)
     ax.set_ylabel(r"$Q/Q_\mathrm{GB}$")
-    #plt.xscale('log')
-    legend = plt.legend()
-    
-    
+    legend = plt.legend(loc='upper right')
+    legend.set_in_layout(False)
     plt.tight_layout()
+    
     if args.output is not None:
         plt.savefig(args.output)
     else:

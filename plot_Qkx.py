@@ -64,15 +64,21 @@ def get_Qkx(d, ispec=0, navgfac=0.5, label=None, plot=False, ax=None, Lref="a", 
         istart_avg = int(len(t)*navgfac)
         Qkx = np.mean(Qkxt[istart_avg:], axis=0)
 
-
+    if np.all(np.isnan(Qkx)):
+        print("All nan for '"  +ncfile +"', Skipping.")
+        return kx, Qkx
+    
     
     if plot:
         if ax is None:
             fig, ax  =plt.subplots(1)
-        print("!!! " + str(Qkx))
         if label == None:
             label = d
-        ax.plot(kx,Qkx,marker='.', markersize=0.3, label=label)
+        try:
+            ax.plot(kx,Qkx,marker='.', markersize=0.3, label=label)
+        except:
+            pass
+            
     return kx, Qkx
 
     
@@ -90,7 +96,8 @@ if __name__ == "__main__":
     Nl = len(args.legend)
     
     
-    
+    refsp = 'i'
+    ispec = 0
     print("Plotting Qkx fluxes.....")
 
     fig, ax = plt.subplots(1)
@@ -100,22 +107,22 @@ if __name__ == "__main__":
             label = args.legend[i]
         else:
             label = None
-        kx, Qkx = get_Qkx(d, ax=ax, plot=True, label = label)
+        kx, Qkx = get_Qkx(d, ax=ax, plot=True, label = label, ispec = ispec, refsp = refsp)
 
     ax.set_yscale('log')
     #ax.set_xscale('log')
     
     #ax.set_xlim(left=0)
     ax.set_ylim(bottom=0)
-    refsp = 'i'
     ax.set_xlabel(r'$k_x \rho_{%s}$' % refsp)
     ax.set_ylabel(r"$Q/Q_\mathrm{GB}$")
-    #plt.xscale('log')
-    legend = plt.legend()
-    #legend.set_in_layout(False)
-            
-    
+    ax.set_yscale('log')
+    ax.set_xscale('log')
+    ax.set_ylim(bottom=0)
+    legend = plt.legend(loc='upper right')
+    legend.set_in_layout(False)
     plt.tight_layout()
+
     if args.output is not None:
         plt.savefig(args.output)
     else:

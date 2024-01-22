@@ -219,7 +219,27 @@ class Gx_input(object):
     def ntheta(self,val):
         self.changevar("Dimensions","ntheta",val)
 
+
+    @property
+    def nlaguerre(self):
+        return self.get_value_from_input_or_defaults("Dimensions","nlaguerre")
+
+    @nlaguerre.setter
+    def nlaguerre(self,val):
+        self.changevar("Dimensions","nlaguerre",val)
+
+
     
+    @property
+    def nhermite(self):
+        return self.get_value_from_input_or_defaults("Dimensions","nhermite")
+
+    @nhermite.setter
+    def nhermite(self,val):
+        self.changevar("Dimensions","nhermite",val)
+
+    
+        
     @property
     def npol(self):
         return self.get_value_from_input_or_defaults("Geometry","npol")

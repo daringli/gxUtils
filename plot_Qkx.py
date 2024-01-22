@@ -110,14 +110,9 @@ if __name__ == "__main__":
         kx, Qkx = get_Qkx(d, ax=ax, plot=True, label = label, ispec = ispec, refsp = refsp)
 
     ax.set_yscale('log')
-    #ax.set_xscale('log')
-    
-    #ax.set_xlim(left=0)
     ax.set_ylim(bottom=0)
     ax.set_xlabel(r'$k_x \rho_{%s}$' % refsp)
     ax.set_ylabel(r"$Q/Q_\mathrm{GB}$")
-    ax.set_yscale('log')
-    ax.set_xscale('log')
     ax.set_ylim(bottom=0)
     legend = plt.legend(loc='upper right')
     legend.set_in_layout(False)

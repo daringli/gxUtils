@@ -8,8 +8,13 @@ import sys
 from netCDF4 import Dataset
 from decide_version import decide_version
 
+from matplotlib import colormaps
+
 
 sqrt2 = np.sqrt(2)
+
+def get_colors(colormap_name, n):
+    return colormaps[colormap_name].resampled(n)(np.linspace(0.0, 1.0, n))
 
 
 def get_Qky_max(d, ispec=0, navgfac=0.5):
@@ -23,7 +28,7 @@ def get_maxky(d, ispec=0, navgfac=0.5):
 
 
     
-def get_Qky(d, ispec=0, navgfac=0.5, label=None, plot=False, ax=None, Lref="a", refsp=None):
+def get_Qky(d, ispec=0, navgfac=0.5, label=None, plot=False, ax=None, Lref="a", refsp=None, color=None):
 
     
     if d[-3:] == ".nc":
@@ -72,7 +77,7 @@ def get_Qky(d, ispec=0, navgfac=0.5, label=None, plot=False, ax=None, Lref="a", 
         if ax is None:
             fig, ax  =plt.subplots(1)
         try:
-            ax.plot(ky,Qky,marker='.', label=label,markersize=0.3)
+            ax.plot(ky,Qky,marker='.', label=label,markersize=0.3, color=color)
         except:
             pass
             
@@ -89,22 +94,31 @@ if __name__ == "__main__":
     parser.add_argument("simdirs", nargs="+", metavar='simdir', help='Simulation directories from which to read GX outputs from.', default=['.'])
     parser.add_argument("-o","--output", nargs="?", action='store', metavar='filename',  help='Optional filename to save output to.', default = None)
     parser.add_argument("-l","--legend", nargs="*", action='store', metavar='label',  help='Optional list of labels for legends', default = [])
+    parser.add_argument("--colormap","--cm", choices=list(colormaps), metavar='cm',  help='Name of matplotlib colormap', default = None)
     
+    args = parser.parse_args()
+    
+    N = len(args.simdirs)
+    if args.colormap is not None:
+        colors=get_colors(args.colormap, N)
+    else:
+        colors = [None] * N
+        
     print("Plotting Qky fluxes.....")
 
     fig, ax = plt.subplots(1)
 
     refsp = 'i'
     ispec = 0
-    args = parser.parse_args()
     Nl = len(args.legend)
     
     for i, d in enumerate(args.simdirs):
+        color = colors[i]
         if i < Nl:
             label = args.legend[i]
         else:
             label = None
-        get_Qky(d, ax=ax, plot=True, label=label, refsp = refsp, ispec=ispec)
+        get_Qky(d, ax=ax, plot=True, label=label, refsp = refsp, ispec=ispec, color=color)
         
     ax.set_yscale('log')
     ax.set_xscale('log')

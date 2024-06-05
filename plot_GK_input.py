@@ -6,12 +6,14 @@ from simsopt.mhd.vmec_diagnostics import vmec_fieldlines
 from simsopt.mhd import Vmec
 
 import sys
-from gx_input import Gx_input as GK_input
+#from gx_input import Gx_input as GK_input
+from stella_input import Stella_input as GK_input
+
 
 from scipy.integrate import cumtrapz
 
 
-def plot_GK_input(dirname, axes=None, n=999, coord='L', variables=[], preset = 2, normalization='code', npol=6):
+def plot_GK_input(dirname, axes=None, n=200, coord='L', variables=[], preset = 2, normalization='code', npol=3):
 
     d = dirname
 

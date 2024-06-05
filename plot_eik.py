@@ -3,8 +3,8 @@
 from eik_tools import EikFile
 import sys
 import matplotlib.pyplot as plt
+import matplotlib as mpl
 import numpy as np
-
 
 def plot_eik(files, outputs  = ["bmag", "gradpar", "gbdrift", "cvdrift", "cvdrift0", "gds2", "gds21", "gds22"], axes=None):
     

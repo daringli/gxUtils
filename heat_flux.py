@@ -11,8 +11,13 @@ from netCDF4 import Dataset
 
 from get_Qi_t2 import get_Qi_t_nc
 
+from matplotlib import colormaps
 
-def heat_flux(dirname, ispec=0, navgfac=0.5, label=None, plot=True, fig=None, Lref="a", refsp=None):
+
+def get_colors(colormap_name, n):
+    return colormaps[colormap_name].resampled(n)(np.linspace(0.0, 1.0, n))
+
+def heat_flux(dirname, ispec=0, navgfac=0.5, label=None, plot=True, fig=None, Lref="a", refsp=None, color=None):
     try:
         q, t = get_Qi_t_nc(dirname)
     except:
@@ -44,7 +49,7 @@ def heat_flux(dirname, ispec=0, navgfac=0.5, label=None, plot=True, fig=None, Lr
         if fig == None:
             fig = plt.figure(0)
         try:
-            plt.plot(t,q,'-',label=r"%s: $Q_%s/Q_\mathrm{GB}$ = %.5g"%(label, species_tag, qavg))
+            plt.plot(t,q,'-',label=r"%s: $Q_%s/Q_\mathrm{GB}$ = %.5g"%(label, species_tag, qavg), color=color)
         except:
             pass
         else:
@@ -62,21 +67,27 @@ if __name__ == "__main__":
     parser.add_argument("simdirs", nargs="+", metavar='simdir', help='Simulation directories from which to read GX outputs from.', default=['.'])
     parser.add_argument("-o","--output", nargs="?", action='store', metavar='filename',  help='Optional filename to save output to.', default = None)
     parser.add_argument("-l","--legend", nargs="*", action='store', metavar='label',  help='Optional list of labels for legends', default = [])
+    parser.add_argument("--colormap","--cm", choices=list(colormaps), metavar='cm',  help='Name of matplotlib colormap', default = None)
     
-
-    
-
     args = parser.parse_args()
 
+    
+    N = len(args.simdirs)
+    if args.colormap is not None:
+        colors=get_colors(args.colormap, N)
+    else:
+        colors = [None] * N
+    
     print("Plotting heat fluxes.....")
     ispec=0
     Nl = len(args.legend)
     for i, d in enumerate(args.simdirs):
+        color = colors[i]
         if i < Nl:
             label = args.legend[i]
         else:
             label = None
-        heat_flux(d, ispec=ispec, refsp="i", label=label)
+        heat_flux(d, ispec=ispec, refsp="i", label=label, color=color)
     
     plt.xlim(0)
     plt.ylim(0)

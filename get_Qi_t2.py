@@ -53,10 +53,21 @@ def get_dataset(ncfile,version):
 
 def get_Qi_t_nc(dirname, version=None):
 
+    if dirname[-3:] == ".nc":
+        tmp = dirname.rsplit('/',1)
+        dirname = tmp[0]
+        _ncfile = tmp[1]
+    else:
+        _ncfile = None
     ncfile, version = decide_version(dirname)
+
+    if _ncfile is not None:
+        ncfile = dirname + "/" + _ncfile
+    
     if ncfile is None:
         print("GX output does not exist in '" + dirname + "'")
         return (np.nan,np.nan)
+
     Qi, t = get_dataset(ncfile,version)
     
     # remove invalid entries
@@ -68,10 +79,7 @@ def get_Qi_t_nc(dirname, version=None):
         while t.mask[-1] == True:
             t = t[:-1]
             Qi = Qi[:-1]
-    ret = (np.array(Qi),np.array(t))
-        
-        
-      
+    ret = (np.array(Qi),np.array(t))  
     return ret
 
 

@@ -32,8 +32,15 @@ def get_Qky(d, ispec=0, navgfac=0.5, label=None, plot=False, ax=None, Lref="a", 
 
     
     if d[-3:] == ".nc":
-        d = d.rsplit('/',1)[0]
+        tmp = d.rsplit('/',1)
+        d = tmp[0]
+        _ncfile = tmp[1]
+    else:
+        _ncfile = None
     ncfile, version = decide_version(d)
+
+    if _ncfile is not None:
+        ncfile = d + "/" + _ncfile
     
     if version == 1:
         time_str = "time"

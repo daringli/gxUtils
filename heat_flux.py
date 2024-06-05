@@ -23,7 +23,6 @@ def heat_flux(dirname, ispec=0, navgfac=0.5, label=None, plot=True, fig=None, Lr
     except:
         q = np.array([np.nan])
         t = np.array([np.nan])
-    print(t)
     #species_type = data.groups['Inputs'].groups['Species'].variables['species_type'][ispec]
     #if species_type == 0:
     #    species_tag = "i"

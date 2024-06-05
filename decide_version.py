@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 
 import os
+from glob import glob
 
 def decide_version(dirname):
 
@@ -17,5 +18,11 @@ def decide_version(dirname):
     else:
         ncfile = None
         version = None
+
+    # check for multiple files
+    ncfiles = sorted(glob(dirname + "/gx.out[0-9].nc"))
+    if len(ncfiles) > 0:
+        version = 2
+        ncfile = ncfiles
     
     return ncfile, version

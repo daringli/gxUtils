@@ -6,95 +6,79 @@ import matplotlib.pyplot as plt
 import matplotlib as mpl
 import numpy as np
 
-mpl.rcParams.update({'font.size': 6, 'lines.linewidth' : 1})
-
-
-def plot_file(f, label=None, titles=None):    
-    ef = EikFile(f)
-    theta = ef.theta
-    ntheta = len(theta)
-
-    ys = np.zeros((8,ntheta))
-    x = ef.scaled_theta/(np.pi)
-    outputs = ["bmag", "gradpar", "gbdrift", "cvdrift", "cvdrift0", "gds2", "gds21", "gds22"]
-
-    if titles == None:
-        titles = outputs
+def plot_eik(files, outputs  = ["bmag", "gradpar", "gbdrift", "cvdrift", "cvdrift0", "gds2", "gds21", "gds22"], axes=None):
     
-    if label == None:
-        label = f
+    nplots = len(outputs)
+    if axes is None:
+        if nplots <= 4:
+            ncolsMax = 2
+        else:
+            ncolsMax = 4
+        ncols = np.min((nplots,ncolsMax))
+        nrows = (nplots-1)//ncols + 1
+        fig,axes = plt.subplots(nrows=nrows,ncols=ncols, squeeze=False,sharex=True)
+        axes = axes.flatten()
+    else:
+        axes = axes.flatten()
+        assert len(axes) >= nplots
+
     
-    for i, output in enumerate(outputs):
-        ys[i] = getattr(ef,output)
-        axes[i].plot(x,ys[i], label=label)
-        axes[i].set_title(titles[i])
-        axes[i].ticklabel_format(useOffset=False)
-    
+    for f in files:
+        ef = EikFile(f)
+        theta = ef.theta
+        ntheta = len(theta)
+
+        ys = np.zeros((8,ntheta))
+        x = ef.scaled_theta/(np.pi)
+        
+        for i, output in enumerate(outputs):
+            ys[i] = getattr(ef,output)
+            axes[i].plot(x,ys[i])
+            axes[i].set_title(output)
+
+    return axes, ncols
 
 if __name__ == "__main__":
-
     import argparse
 
     parser = argparse.ArgumentParser()
-    parser.add_argument("eikfiles", nargs="+", metavar='eikfile', help='Eikfiles from which to take geometries.', default=['.'])
+    parser.add_argument("eikfiles", nargs="+", metavar='eikfile', help='Simulation directories from which to take geometries.', default=['.'])
+    parser.add_argument("--plot", nargs="+", action='store', metavar='variables', default=['bmag', 'gradpar', 'gbdrift', 'cvdrift', 'cvdrift0', 'gds2', 'gds21', 'gds22'], help='Can be used to specify exactly which variables (modB, gds2, etc) to plot.')
+    parser.add_argument("-p","--preset", action='store', nargs='?', metavar='preset', default=0, help='Useful presets for plotting all variables that enter in the gyrokinetic equation, etc.', type=int)
     parser.add_argument("-o","--output", nargs="?", action='store', metavar='filename',  help='Optional filename to save output to.', default = None)
     parser.add_argument("-l","--legend", nargs="*", action='store', metavar='label',  help='Optional list of labels for legends', default = [])
     
-    parser.add_argument("-p", "--pretty", action="store_true", default=False, help="Whether to write pretty LaTeX titles. Default False")
-
-    parser.add_argument("-c", "--Ncols", nargs="?", action="store", default=2, help="Whether to write pretty LaTeX titles. Default False")
     
-
     args = parser.parse_args()
-
-    ncols = int(args.Ncols)
-    nrows = int(np.ceil(8/ncols))
+    files = args.eikfiles
+    preset = args.preset
     
-    fig, axes = plt.subplots(nrows, ncols, sharex=True)
-    axes = axes.flatten()
-
+    if preset == 0:
+        add_variables = []
+    elif preset == 1:
+        add_variables = ['gradpar', 'gds2', 'gds21', 'gds22']
+    elif preset == 2:
+        add_variables = ['bmag', 'gradpar', 'gbdrift', 'cvdrift', 'cvdrift0', 'gds2', 'gds21', 'gds22']
+    variables = args.plot
+    variables = set(variables + add_variables)
     
+    axes = None
+    legends = []
     Nl = len(args.legend)
-
-    if args.pretty:
-        titles = [r"$B$",r"$\nabla_{\|\|} \theta$", r"$\frac{2}{B^3}(\vec{B} \times \nabla B) \cdot \nabla y$", \
-                  r"$\frac{2}{B^3}(\vec{B} \times \nabla B) \cdot \nabla y$", r"$\frac{2\hat{s}}{B^3}(\vec{B} \times \nabla B) \cdot \nabla x$", r"$|\nabla y|^2$", r"$\hat{s}\nabla y \cdot \nabla x$", r"$\hat{s}^2|\nabla x|^2$"]
-    else:
-        titles = None
-
-    for i, f in enumerate(args.eikfiles):
+    for i, f in enumerate(files):
         if i < Nl:
-            label = args.legend[i]
+            legends.append(args.legend[i])
         else:
-            label = None
- 
-        plot_file(f, label=label, titles=titles)
-
-    axes[1].legend()
-
-    # some nice presets for common column numbers
-    if ncols == 2:
-        axes[-2].set_xlabel(r"$\theta/\pi$")
-        axes[-1].set_xlabel(r"$\theta/\pi$")
-        plt.subplots_adjust(left=0.1,
-                        bottom=0.1, 
-                        right=0.9, 
-                        top=0.9, 
-                        wspace=0.4, 
-                        hspace=0.4)
-    elif ncols == 4:
-        axes[-4].set_xlabel(r"$\theta/\pi$")
-        axes[-3].set_xlabel(r"$\theta/\pi$")
-        axes[-2].set_xlabel(r"$\theta/\pi$")
-        axes[-1].set_xlabel(r"$\theta/\pi$")
-        plt.subplots_adjust(left=0.05,
-                        bottom=0.3, 
-                        right=0.98, 
-                        top=0.9, 
-                        wspace=0.5, 
-                            hspace=0.25)
-
+            legends.append(None)
         
+
+    axes, ncols = plot_eik(files, variables)
+    axes[-1].legend(legends)
+
+    for i in range(ncols):
+        axes[-(i+1)].set_xlabel(r"$\theta/\pi$")
+
+
     if args.output is not None:
         plt.savefig(args.output)
     else:

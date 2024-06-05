@@ -67,8 +67,18 @@ def get_Qi_t_nc(dirname, version=None):
     if ncfile is None:
         print("GX output does not exist in '" + dirname + "'")
         return (np.nan,np.nan)
-
-    Qi, t = get_dataset(ncfile,version)
+    
+    if isinstance(ncfile, list):
+        Qis = []
+        ts = []
+        for f in ncfile:
+            _Qi, _t = get_dataset(f,version)
+            Qis.append(_Qi)
+            ts.append(_t)
+        Qi = np.concatenate(Qis)
+        t = np.concatenate(ts)
+    else:
+        Qi, t = get_dataset(ncfile,version)
     
     # remove invalid entries
     # at the end of vector

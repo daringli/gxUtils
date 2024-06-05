@@ -38,7 +38,12 @@ def get_Qkx(d, ispec=0, navgfac=0.5, label=None, plot=False, ax=None, Lref="a", 
     if d[-3:] == ".nc":
         d = d.rsplit('/',1)[0]
     ncfile, version = decide_version(d)
-
+    
+    if isinstance(ncfile, list):
+        # if we have restarted and got multiple output files
+        # use the latest file
+        ncfile = ncfile[-1]
+    
     if version == 1:
         time_str = "time"
         kx_str = "kx"

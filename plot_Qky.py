@@ -39,6 +39,11 @@ def get_Qky(d, ispec=0, navgfac=0.5, label=None, plot=False, ax=None, Lref="a", 
         _ncfile = None
     ncfile, version = decide_version(d)
 
+    if isinstance(ncfile, list):
+        # if we have restarted and got multiple output files
+        # use the latest file
+        ncfile = ncfile[-1]
+    
     if _ncfile is not None:
         ncfile = d + "/" + _ncfile
     

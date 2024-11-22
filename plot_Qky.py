@@ -8,7 +8,11 @@ import sys
 from netCDF4 import Dataset
 from decide_version import decide_version
 
+
 from matplotlib import colormaps
+
+
+from get_Qi_t2 import get_Qi_t_nc
 
 
 sqrt2 = np.sqrt(2)
@@ -69,6 +73,7 @@ def get_Qky(d, ispec=0, navgfac=0.5, label=None, plot=False, ax=None, Lref="a", 
         
     t = sqrt2 * data[time_str][:]
     ky = sqrt2 * data[ky_str][:]
+    dky = ky[1] - ky[0]
     #print(t)
     #print(version)
     try:
@@ -89,10 +94,20 @@ def get_Qky(d, ispec=0, navgfac=0.5, label=None, plot=False, ax=None, Lref="a", 
         if ax is None:
             fig, ax  =plt.subplots(1)
         try:
-            ax.plot(ky,Qky,marker='.', label=label,markersize=0.3, color=color)
+            ax.plot(ky,Qky/dky,marker='.', label=label,markersize=0.3, color=color)
         except:
             pass
-            
+
+    # was used for debugging
+    # try:
+    #     q, t = get_Qi_t_nc(d)
+    # except:
+    #     q = np.array([np.nan])
+    #     t = np.array([np.nan])
+    #     print("failed to load q")
+    # print(np.max(q - np.sum(Qkyt,axis=1)))
+    # print(np.mean(q[istart_avg:]))
+    
         
     return ky, Qky
 
@@ -107,8 +122,14 @@ if __name__ == "__main__":
     parser.add_argument("-o","--output", nargs="?", action='store', metavar='filename',  help='Optional filename to save output to.', default = None)
     parser.add_argument("-l","--legend", nargs="*", action='store', metavar='label',  help='Optional list of labels for legends', default = [])
     parser.add_argument("--colormap","--cm", choices=list(colormaps), metavar='cm',  help='Name of matplotlib colormap', default = None)
+    parser.add_argument("--liny", action='store_const', metavar='lineary',  help='Plot with a linear scale on y-axis (default False)', default = False, const=True)
+    parser.add_argument("--linx", action='store_const', metavar='linearx',  help='Plot with a linear scale on x-axis (default False)', default = False, const=True)
+    
     
     args = parser.parse_args()
+
+    liny = args.liny
+    linx = args.linx
     
     N = len(args.simdirs)
     if args.colormap is not None:
@@ -132,8 +153,10 @@ if __name__ == "__main__":
             label = None
         get_Qky(d, ax=ax, plot=True, label=label, refsp = refsp, ispec=ispec, color=color)
         
-    ax.set_yscale('log')
-    ax.set_xscale('log')
+    if not liny:
+        ax.set_yscale('log')
+    if not linx:
+        ax.set_xscale('log')
     ax.set_xlim(left=0)
     ax.set_ylim(bottom=0)
     ax.set_xlabel(r'$k_y \rho_{%s}$' % refsp)

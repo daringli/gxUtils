@@ -64,6 +64,7 @@ def get_Qkx(d, ispec=0, navgfac=0.5, label=None, plot=False, ax=None, Lref="a", 
         return kx, Qkx
     t = sqrt2 * data[time_str][:]
     kx = sqrt2 * data[kx_str][:]
+    dkx = kx[1] - kx[0]
     #print(t)
     #print(version)
     try:
@@ -86,7 +87,7 @@ def get_Qkx(d, ispec=0, navgfac=0.5, label=None, plot=False, ax=None, Lref="a", 
         if label == None:
             label = d
         try:
-            ax.plot(kx,Qkx,marker='.', markersize=0.3, label=label, color=color)
+            ax.plot(kx,Qkx/dkx,marker='.', markersize=0.3, label=label, color=color)
         except:
             pass
             
@@ -103,8 +104,13 @@ if __name__ == "__main__":
     parser.add_argument("-o","--output", nargs="?", action='store', metavar='filename',  help='Optional filename to save output to.', default = None)
     parser.add_argument("-l","--legend", nargs="*", action='store', metavar='label',  help='Optional list of labels for legends', default = [])
     parser.add_argument("--colormap","--cm", choices=list(colormaps), metavar='cm',  help='Name of matplotlib colormap', default = None)
+    parser.add_argument("--liny", action='store_const', metavar='lineary',  help='Plot with a linear scale on y-axis (default False)', default = False, const=True)
+    parser.add_argument("--linx", action='store_const', metavar='linearx',  help='Plot with a linear scale on x-axis (default False)', default = False, const=True)
     
     args = parser.parse_args()
+
+    liny = args.liny
+    linx = args.linx
     
     N = len(args.simdirs)
     if args.colormap is not None:
@@ -129,11 +135,13 @@ if __name__ == "__main__":
             label = None
         kx, Qkx = get_Qkx(d, ax=ax, plot=True, label = label, ispec = ispec, refsp = refsp, color=color)
 
-    ax.set_yscale('log')
-    ax.set_ylim(bottom=0)
+    if not liny:
+        ax.set_yscale('log')
+        ax.set_ylim(bottom=0)
+    if not linx:
+        ax.set_xscale('symlog')
     ax.set_xlabel(r'$k_x \rho_{%s}$' % refsp)
     ax.set_ylabel(r"$Q/Q_\mathrm{GB}$")
-    ax.set_ylim(bottom=0)
     legend = plt.legend(loc='upper right')
     legend.set_in_layout(False)
     plt.tight_layout()
